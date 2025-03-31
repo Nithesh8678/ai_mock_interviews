@@ -49,11 +49,12 @@ export async function signUp(params: SignUpParams) {
       success: true,
       message: "Account created successfully. Please sign in.",
     };
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error("Error creating user:", error);
 
     // Handle Firebase specific errors
-    if (error.code === "auth/email-already-exists") {
+    const firebaseError = error as { code?: string };
+    if (firebaseError.code === "auth/email-already-exists") {
       return {
         success: false,
         message: "This email is already in use",
@@ -79,8 +80,13 @@ export async function signIn(params: SignInParams) {
       };
 
     await setSessionCookie(idToken);
-  } catch (error: any) {
-    console.log("");
+
+    return {
+      success: true,
+      message: "Signed in successfully",
+    };
+  } catch (error: unknown) {
+    console.error("Sign in error:", error);
 
     return {
       success: false,
@@ -98,6 +104,14 @@ export async function signOut() {
 
 // Get current user from session cookie
 export async function getCurrentUser(): Promise<User | null> {
+  // Return mock user instead of checking authentication
+  return {
+    id: "mock-user-id",
+    name: "Mock User",
+    email: "mock@example.com",
+  } as User;
+
+  /*
   const cookieStore = await cookies();
 
   const sessionCookie = cookieStore.get("session")?.value;
@@ -123,10 +137,16 @@ export async function getCurrentUser(): Promise<User | null> {
     // Invalid or expired session
     return null;
   }
+  */
 }
 
 // Check if user is authenticated
 export async function isAuthenticated() {
+  // Always return true to bypass authentication
+  return true;
+
+  /*
   const user = await getCurrentUser();
   return !!user;
+  */
 }
